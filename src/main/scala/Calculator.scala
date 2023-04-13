@@ -1,9 +1,11 @@
 package com.knoldus
+
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class CalculatorException(message: String) extends Exception(message)
+
 // A singleton object for the calculator that defines its methods
 object Calculator {
   // This method takes an operator and a sequence of operands , returns a future
@@ -24,6 +26,15 @@ object Calculator {
       case _ => Future.failed(CalculatorException("Invalid operator"))
     }
   }
+
+  private def execute(operator: Operator, operands: Seq[Double]): Future[Seq[Double]] = {
+    if (operator.validate(operands)) {
+      Future.successful(operator.validateAndExecute(operands))
+    } else {
+      Future.failed(CalculatorException("Invalid"))
+    }
+  }
+
   // This method takes two operands and returns whether their squares are equal or not
   def squareOfExpression(firstOperand: Double, secondOperand: Double): String = {
     val left = Math.pow((firstOperand + secondOperand), 2)
@@ -35,6 +46,7 @@ object Calculator {
       "NotEqual"
     }
   }
+
   // This method takes a sequence of numbers and returns a Future containing a sequence of results
   def find(numbers: Seq[Double]): Future[Seq[Double]] = {
     // Recursive function to calculate the factorial of a number
@@ -43,6 +55,7 @@ object Calculator {
       if (number <= 1) accumulator
       else findFactorial(number - 1, accumulator * number)
     }
+
     val res = numbers.filter { num =>
       val res1 = findFactorial(num, 1)
       res1 > math.pow(6, num)
@@ -50,12 +63,15 @@ object Calculator {
     Future(res)
   }
 
+  // Define a function to find the average of a sequence of numbers after filtering based on a Fibonacci property
   def findAverageAfterChainingOperations(numbers: Seq[Double]): Future[Double] = {
     Future {
+      // Define a recursive Fibonacci function that returns the Nth Fibonacci number
       def fibonacci(times: Double, numberOne: Double, numberTwo: Double): Double = {
         if (times <= 1) numberTwo
         else fibonacci(times - 1, numberTwo, numberOne + numberTwo)
       }
+
       val filteredDataNumbers = numbers.filter { num =>
         val res = fibonacci(num.toInt, 0, 1)
         res % 2 != 0
@@ -63,36 +79,37 @@ object Calculator {
       filteredDataNumbers.foldLeft(0.0)((numOne: Double, numTwo: Double) => numOne + numTwo) / filteredDataNumbers.size
     }
   }
-
-  private def execute(operator: Operator, operands: Seq[Double]): Future[Seq[Double]] = {
-    if (operator.validate(operands)) {
-      Future.successful(operator.validateAndExecute(operands))
-    } else {
-      Future.failed(CalculatorException("Invalid"))
-    }
-  }
 }
 
+// An operator which add two operands
 object Add extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = Seq(operands.head + operands.last)
 }
 
+// An operator which subtracts two operands
 object Subtract extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = Seq(operands.last - operands.head)
 }
 
+// An operator which multiplies two operands
 object Multiply extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = Seq(operands.head * operands.last)
 }
 
+// An operator which divides two operands
 object Divide extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2 && operands.last != 0
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = Seq(operands.head / operands.last)
 }
 
+// An operator which finds the power of the operand
 object Power extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2
 
@@ -101,13 +118,17 @@ object Power extends ValidateOperator {
   }
 }
 
+// An operator which finds the square Root of the operand
 object SquareRoot extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 1 && operands.head >= 0
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = Seq(math.sqrt(operands.head))
 }
 
+// an operator which finds the factorial of the operand
 object Factorial extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 1 && operands.head >= 0 && operands.head == operands.head.toInt
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     def factorial(n: Int): Int = {
       if (n == 0 || n == 1) {
@@ -117,15 +138,19 @@ object Factorial extends ValidateOperator {
         n * factorial(n - 1)
       }
     }
+
     Seq(factorial(operands.head.toInt))
   }
 }
 
+// An operator which finds the sum of all the operands
 object sum extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.nonEmpty
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     Seq(sumRecursive(operands))
   }
+
   private def sumRecursive(operands: Seq[Double]): Double = {
     if (operands.size == 1) {
       operands.head
@@ -134,47 +159,58 @@ object sum extends ValidateOperator {
     }
   }
 }
+
+// An operator which find the gcd of two operands
 object GCD extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 2
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     def gcd(a: Double, b: Double): Double = {
       if (b == 0) a else gcd(b, a % b)
     }
+
     Seq(gcd(operands.head, operands.last))
   }
 }
 
+// An operator which finds all the even operands
 object IsEven extends ValidateOperator {
+  override def validate(operands: Seq[Double]): Boolean = {
+    if (operands.nonEmpty) true
+    else false
+  }
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     operands.filter(x => x % 2 == 0)
   }
+}
+
+// An operator which finds all the odd operands
+object IsOdd extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = {
     if (operands.nonEmpty) true
     else false
   }
-}
 
-object IsOdd extends ValidateOperator {
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     operands.filterNot(x => x % 2 == 0)
   }
-  override def validate(operands: Seq[Double]): Boolean = {
-    if (operands.nonEmpty) true
-    else false
-  }
 }
 
+// an operator which find the fibonacci numbers till the last operand
 object Fibonacci extends ValidateOperator {
   override def validate(operands: Seq[Double]): Boolean = operands.length == 1 && operands.head >= 0
+
   override protected def execute(operands: Seq[Double]): Seq[Double] = {
     val result = fibonacciRecursive(operands.head)
     result
   }
+
   private def fibonacciRecursive(number: Double): Seq[Double] = {
     if (number <= 0) Seq()
     else if (number == 1) Seq(0)
-    else if(number == 2) Seq(0,1)
-    else{
+    else if (number == 2) Seq(0, 1)
+    else {
       val prevSeq = fibonacciRecursive(number - 1)
       prevSeq :+ (prevSeq.takeRight(2).sum)
     }
