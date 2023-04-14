@@ -35,7 +35,7 @@ object CalculatorDriver extends App {
     case Success(result) => println(result)
     case Failure(exception) => println(exception)
   }
-  private val findAverageAfterChainingOperations = Calculator.findAverageAfterChainingOperations(Seq(3, 5, 7, 9))
+  private val findAverageAfterChainingOperations = Calculator.findAverageAfterChainingOperations(Seq(3,5,7,9))
   findAverageAfterChainingOperations.onComplete {
     case Success(result) => println(result)
     case Failure(exception) => println(exception)

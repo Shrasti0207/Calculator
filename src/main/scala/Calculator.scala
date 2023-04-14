@@ -67,16 +67,14 @@ object Calculator {
   def findAverageAfterChainingOperations(numbers: Seq[Double]): Future[Double] = {
     Future {
       // Define a recursive Fibonacci function that returns the Nth Fibonacci number
-      def fibonacci(times: Double, valueOne: Double, valueTwo: Double): Double = {
-        if (times <= 1) valueTwo
+      def fibonacci(times: Double, valueOne: Double=0, valueTwo: Double=1): Double = {
+        if (times == 1) 0.0
+        else if(times <= 2) valueTwo
         else fibonacci(times - 1, valueTwo, valueOne + valueTwo)
       }
-
-      val filteredDataNumbers = numbers.filter { num =>
-        val res = fibonacci(num.toInt, 0, 1)
-        res % 2 != 0
-      }
-      filteredDataNumbers.foldLeft(0.0)((valOne: Double, valTwo: Double) => valOne + valTwo) / filteredDataNumbers.size
+      val fiboSeries = numbers.map(value => fibonacci(value))
+      val odds = fiboSeries.filter(_ % 2 != 0)
+      odds.foldLeft(0.0)(_+_) / odds.size
     }
   }
 }
