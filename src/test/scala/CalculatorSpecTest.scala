@@ -1,7 +1,6 @@
 package com.knoldus
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
-
 import scala.concurrent.{Await, Future}
 
 class CalculatorSpecTest extends AnyFunSuite {

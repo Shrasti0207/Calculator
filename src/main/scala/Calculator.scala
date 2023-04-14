@@ -51,13 +51,13 @@ object Calculator {
   def find(numbers: Seq[Double]): Future[Seq[Double]] = {
     // Recursive function to calculate the factorial of a number
     @tailrec
-    def findFactorial(number: Double, accumulator: Double): Double = {
+    def factorial(number: Double, accumulator: Double): Double = {
       if (number <= 1) accumulator
-      else findFactorial(number - 1, accumulator * number)
+      else factorial(number - 1, accumulator * number)
     }
 
     val res = numbers.filter { num =>
-      val res1 = findFactorial(num, 1)
+      val res1 = factorial(num, 1)
       res1 > math.pow(6, num)
     }
     Future(res)
@@ -67,16 +67,16 @@ object Calculator {
   def findAverageAfterChainingOperations(numbers: Seq[Double]): Future[Double] = {
     Future {
       // Define a recursive Fibonacci function that returns the Nth Fibonacci number
-      def fibonacci(times: Double, numberOne: Double, numberTwo: Double): Double = {
-        if (times <= 1) numberTwo
-        else fibonacci(times - 1, numberTwo, numberOne + numberTwo)
+      def fibonacci(times: Double, valueOne: Double, valueTwo: Double): Double = {
+        if (times <= 1) valueTwo
+        else fibonacci(times - 1, valueTwo, valueOne + valueTwo)
       }
 
       val filteredDataNumbers = numbers.filter { num =>
         val res = fibonacci(num.toInt, 0, 1)
         res % 2 != 0
       }
-      filteredDataNumbers.foldLeft(0.0)((numOne: Double, numTwo: Double) => numOne + numTwo) / filteredDataNumbers.size
+      filteredDataNumbers.foldLeft(0.0)((valOne: Double, valTwo: Double) => valOne + valTwo) / filteredDataNumbers.size
     }
   }
 }
